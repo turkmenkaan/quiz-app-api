@@ -1,0 +1,52 @@
+[
+{
+    "model" : "api.Question",
+    "pk" : 1,
+    "fields" : {
+        "prompt" : "This is a test question.",
+        "point" : 0,
+        "choices" : [1,2,3,4],
+        "correct_answer_id" : 1
+    }
+},
+{
+    "model" : "api.Question",
+    "pk" : 2,
+    "fields" : {
+        "prompt" : "This is the second test question",
+        "point" : 10,
+        "choices" : [1,2,3,4],
+        "correct_answer_id" : 1
+    }
+},
+{
+    "model" : "api.Question",
+    "pk" : 3,
+    "fields" : {
+        "prompt" : "Is this a test question?",
+        "point" : 10,
+        "choices" : [1,2,3,4],
+        "correct_answer_id" : 1
+    }
+},
+{
+    "model" : "api.Question",
+    "pk" : 4,
+    "fields" : {
+        "prompt" : "This looks like a test question too",
+        "point" : 20,
+        "choices" : [1,2,3,4],
+        "correct_answer_id" : 1
+    }
+},
+{
+    "model" : "api.Question",
+    "pk" : 5,
+    "fields" : {
+        "prompt" : "Is this a test question too?",
+        "point" : 50,
+        "choices" : [1,2,3,4],
+        "correct_answer_id" : 1
+    }
+}
+]

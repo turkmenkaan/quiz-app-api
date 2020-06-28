@@ -1,0 +1,30 @@
+[
+    {
+        "model" : "api.AnswerChoice",
+        "pk" : 1,
+        "fields" : {
+            "text" : "Choice A"
+        }
+    },
+    {
+        "model" : "api.AnswerChoice",
+        "pk" : 2,
+        "fields" : {
+            "text" : "Choice B"
+        }
+    },
+    {
+        "model" : "api.AnswerChoice",
+        "pk" : 3,
+        "fields" : {
+            "text" : "Choice C"
+        }
+    },
+    {
+        "model" : "api.AnswerChoice",
+        "pk" : 4,
+        "fields" : {
+            "text" : "Choice D"
+        }
+    }
+]
