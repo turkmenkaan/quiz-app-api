@@ -1,0 +1,38 @@
+
+STARTGAME - Server to user.
+{   
+    'users' : ['kaan', 'sahircan'],
+    'question-number' : 5
+}
+
+QUESTION - Starts round. Server to user.
+{
+    'question' : 'hello',
+    'choices' : []
+    // Question geldiginde countdown baslat
+}
+
+ANSWER - User to Server. User 1's answer
+{
+    'user' : 'kaan'
+    'answer' : 'merhaba'
+}
+
+ENDQUESTION - Server to room.
+{
+    'answers' : [
+        {
+            'user' : 'kaan',
+            'answer' : 'merhaba'
+        },
+        {
+            'user' : 'sahircan',
+            'answer' : 'avokado'
+        }
+    ],
+    'correct-answer' : 'merhaba'
+}
+
+QUESTION
+
+ENDGAME
