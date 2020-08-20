@@ -1,8 +1,26 @@
 
-STARTGAME - Server to user.
+JOIN ROOM
+{
+    'username' : 'sahircan',
+}
+
+START GAME - Server to user.
 {   
-    'users' : ['kaan', 'sahircan'],
+    'users' : [
+        {
+            "username" : "kaan",
+        }
+        {
+            "username" : "sahircan"
+        }
+        ],
     'question-number' : 5
+}
+
+READY - Users to server. When both users are ready, send the question
+{
+    "roomId" : "",
+    "username" : "kaan"
 }
 
 QUESTION - Starts round. Server to user.
@@ -23,7 +41,7 @@ ENDQUESTION - Server to room.
     'answers' : [
         {
             'user' : 'kaan',
-            'answer' : 'merhaba'
+            'answer' : null,
         },
         {
             'user' : 'sahircan',
