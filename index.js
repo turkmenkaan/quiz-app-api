@@ -11,7 +11,9 @@ require('dotenv').config();
 const port = process.env.PORT || 3000;
 
 let rooms = {};
-let waitingUsers = []; 
+let waitingUsers = [];
+
+
 
 mongoose.connect(process.env.DB, {
     useNewUrlParser: true,
@@ -20,6 +22,7 @@ mongoose.connect(process.env.DB, {
 }, () => {
     console.log("Database connection established!");
 });
+
 
 app.get('/', (req, res) => {
   res.sendFile(__dirname + '/index.html');
@@ -30,6 +33,11 @@ io.on('connection', (socket) => {
 
     socket.on('disconnect', () => {
         console.log('user disconnected');
+
+        // Remove the user from the waiting list
+        // Time complexity O(n)
+        waitingUsers = waitingUsers.filter(user => !(Object.is(socket, user.socket)));
+        console.log(waitingUsers);
     });
   
     socket.on("JOIN ROOM", (object) => {
@@ -44,7 +52,7 @@ io.on('connection', (socket) => {
                 "from" : "en",
                 "to" : "tr"
             }
-            const room = new Room(roomSocket, ['kaan', 'sahircan'], "fruits", 5, langs);
+            const room = new Room(roomSocket, [waitingUsers[0].username, object.username], "fruits", 5, langs);
 
             socket.join(roomId);
             waitingUsers[0].socket.join(roomId);
