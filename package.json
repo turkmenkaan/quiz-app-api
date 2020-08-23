@@ -17,6 +17,7 @@
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
     "http": "0.0.1-security",
+    "lodash.shuffle": "^4.2.0",
     "mocha": "^8.1.1",
     "mongoose": "^5.10.0",
     "socket.io": "^2.3.0",

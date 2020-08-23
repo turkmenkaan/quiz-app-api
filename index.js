@@ -11,7 +11,7 @@ require('dotenv').config();
 const port = process.env.PORT || 3000;
 
 let rooms = {};
-let waitingUsers = []; 
+let waitingUsers = [];
 
 mongoose.connect(process.env.DB, {
     useNewUrlParser: true,
@@ -20,6 +20,7 @@ mongoose.connect(process.env.DB, {
 }, () => {
     console.log("Database connection established!");
 });
+
 
 app.get('/', (req, res) => {
   res.sendFile(__dirname + '/index.html');
@@ -30,8 +31,22 @@ io.on('connection', (socket) => {
 
     socket.on('disconnect', () => {
         console.log('user disconnected');
+
+        // Remove the user from the waiting list
+        // Time complexity O(n)
+        waitingUsers = waitingUsers.filter(user => !(Object.is(socket, user.socket)));
+        console.log(waitingUsers);
     });
-  
+    
+    /** 
+     * Join a room with options from the client
+     * @typedef {Object} object - Options from the client side
+     * @param {string} object.username - Username
+     * @param {string} object.category - Word category of the quiz
+     * @typedef {Object} languages - Languages
+     * @param {('en' | 'tr')} from - Question language
+     * @param {('en' | 'tr')} to - Answer language
+    */
     socket.on("JOIN ROOM", (object) => {
         console.log(`${object.username} is looking for room`);
         
@@ -40,11 +55,18 @@ io.on('connection', (socket) => {
         if (waitingUsers.length > 0) {
             const roomId = uuidv4();
             const roomSocket = io.to(roomId);
+            /*
             const langs = {
                 "from" : "en",
                 "to" : "tr"
-            }
-            const room = new Room(roomSocket, ['kaan', 'sahircan'], "fruits", 5, langs);
+            };
+            */
+           // TODO: decide on users' object structure
+            const users = [waitingUsers[0], {
+                username: object.username,
+                socket
+            }];
+            const room = new Room(roomSocket, users, object.category, 5, object.languages);
 
             socket.join(roomId);
             waitingUsers[0].socket.join(roomId);
@@ -61,7 +83,7 @@ io.on('connection', (socket) => {
 
     socket.on("READY", (object) => {
         const room = rooms[object['room-id']];
-        room.ready(object['username']);
+        room.userReady(socket);
 
         if (room.checkReady()) {
             room.sendQuestion();
