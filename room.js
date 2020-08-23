@@ -19,7 +19,8 @@ class Room {
      *   "to" : "tr"
      * }  
      */
-    constructor(roomSocket, users, category, questionNumber, languages) {
+    constructor(roomId, roomSocket, users, category, questionNumber, languages) {
+        this.roomId = roomId;
         this.roomSocket = roomSocket;
         this.users = users;
         this.category = category;
@@ -30,7 +31,6 @@ class Room {
         users.forEach((user) => {
             this.isReady.set(user.socket, false)
         });
-        console.log(this.isReady);
     }
 
     // Fetch the words from database
@@ -50,7 +50,11 @@ class Room {
     }
 
     startGame = () => {
-        this.roomSocket.emit("START GAME");
+        this.roomSocket.emit("START GAME", {
+            roomId: this.roomId,
+            questionNumber: this.questionNumber,
+            users: this.users.map((user) => user.username)
+        });
     }
 
     // Both users are ready, send the socket message

@@ -13,7 +13,7 @@ const port = process.env.PORT || 3000;
 let rooms = {};
 let waitingUsers = [];
 
-mongoose.connect(process.env.DB, {
+mongoose.connect(process.env.DB_URI, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
     useCreateIndex: true
@@ -35,7 +35,6 @@ io.on('connection', (socket) => {
         // Remove the user from the waiting list
         // Time complexity O(n)
         waitingUsers = waitingUsers.filter(user => !(Object.is(socket, user.socket)));
-        console.log(waitingUsers);
     });
     
     /** 
@@ -66,12 +65,12 @@ io.on('connection', (socket) => {
                 username: object.username,
                 socket
             }];
-            const room = new Room(roomSocket, users, object.category, 5, object.languages);
+            const room = new Room(roomId, roomSocket, users, object.category, 5, object.languages);
 
             socket.join(roomId);
             waitingUsers[0].socket.join(roomId);
             waitingUsers.shift();
-            rooms.roomId = room;
+            rooms[roomId] = room;
             room.startGame();
         } else {
             waitingUsers.push({
@@ -82,7 +81,8 @@ io.on('connection', (socket) => {
     });
 
     socket.on("READY", (object) => {
-        const room = rooms[object['room-id']];
+        console.log(object.roomId);
+        const room = rooms[object.roomId];
         room.userReady(socket);
 
         if (room.checkReady()) {
@@ -94,7 +94,6 @@ io.on('connection', (socket) => {
     })
 
     socket.on('ANSWER', (object) => {
-        console.log(object);
         console.log(`User: ${object.user} Answer: ${object.answer}`);
         // Iki kullanici da cevapladiysa ya da timer bitti ise END QUESTION gonder
         socket.emit("END QUESTION", () => {
