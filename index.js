@@ -1,3 +1,10 @@
+// TODO: Cevap gelince kontrol et
+// TODO: Yeni soru
+// TODO: Oyun sırasında bir kişi disconnect ederse handle'la
+// TODO: Timer
+// TODO: Oyun bitince oyunu rooms'dan sil
+// LEAVE GAME mesajını handle'la
+
 const app = require('express')();
 const http = require('http').createServer(app);
 const io = require('socket.io')(http);
@@ -85,7 +92,6 @@ io.on('connection', (socket) => {
   });
 
   socket.on("READY", (object) => {
-    console.log(rooms);
     const room = rooms[object.roomId];
     room.userReady(socket);
 

@@ -110,7 +110,6 @@ class Room {
   // Send a question
   sendQuestion = () => {
     const question = this.generateQuestion();
-    console.log(question);
     this.roomSocket.emit("QUESTION", question);
   }
 }
