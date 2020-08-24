@@ -6,8 +6,4 @@ const QuestionSchema = new mongoose.Schema({
     category: String
 });
 
-const Question = mongoose.model('Question', QuestionSchema, 'words');
-
-module.exports = {
-    Question
-};
+module.exports = mongoose.model('Question', QuestionSchema, 'words');
