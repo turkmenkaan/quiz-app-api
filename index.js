@@ -17,8 +17,10 @@ require('dotenv').config();
 
 const port = process.env.PORT || 3000;
 
-let rooms = {};
+const rooms = {};
 let waitingUsers = [];
+
+const connectedUsers = {};
 
 mongoose.connect(process.env.DB_URI, {
   useNewUrlParser: true,
@@ -39,6 +41,7 @@ app.get('/', (req, res) => {
 
 io.on('connection', (socket) => {
   console.log('A user connected!');
+  connectedUsers[socket] = null;
 
   socket.on('disconnect', () => {
     console.log('user disconnected');
@@ -72,11 +75,26 @@ io.on('connection', (socket) => {
       };
       */
       // TODO: decide on users' object structure
-      const users = [waitingUsers[0], {
+      
+      const users = {};
+
+      users[socket] = {
         username: object.username,
-        socket
-      }];
+      }
+
+      users[waitingUsers[0].socket] = {
+        username: waitingUsers[0].username
+      }
+      
+      // const users = [waitingUsers[0], {
+      //   username: object.username,
+      //   socket
+      // }];
+      
       const room = new Room(roomId, roomSocket, users, object.category, 5, object.languages);
+
+      connectedUsers[socket] = room;
+      connectedUsers[waitingUsers[0].socket] = room;
 
       socket.join(roomId);
       waitingUsers[0].socket.join(roomId);
@@ -105,6 +123,7 @@ io.on('connection', (socket) => {
 
   socket.on('ANSWER', (object) => {
     console.log(`User: ${object.user} Answer: ${object.answer}`);
+    connectedUsers[socket].checkAnswer(socket, object.answer);
     // Iki kullanici da cevapladiysa ya da timer bitti ise END QUESTION gonder
     socket.emit("END QUESTION", () => {
       // Soru sayisina ulasilmadiysa
