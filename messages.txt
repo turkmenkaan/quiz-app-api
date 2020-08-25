@@ -36,7 +36,7 @@ ANSWER - User to Server. User 1's answer
     'answer' : 'merhaba'
 }
 
-ENDQUESTION - Server to room.
+END QUESTION - Server to room.
 {
     'answers' : [
         {
@@ -54,3 +54,16 @@ ENDQUESTION - Server to room.
 QUESTION
 
 ENDGAME
+{
+    'scoreboard' : [
+        {
+            'user' : 'kaan',
+            'point' : 5
+        }, 
+        {
+            'user' : 'sahircan',
+            'point', : 3
+        }
+    ],
+    'winner' : 'kaan'
+}

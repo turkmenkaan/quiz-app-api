@@ -30,10 +30,16 @@ class Room {
     this.languages = languages;
     // Create a map [[socket1, false], [socket2, false]]
     this.isReady = new Map();
-    users.forEach((user) => {
-      this.isReady.set(user.socket, false)
-    });
+    this.isAnswered = new Map();
+    this.scoreboard = new Map();
     this.currentQuestion = 0; // Question index
+
+    this.users.forEach( (user, socket) => {
+      this.isReady.set(socket, false);
+      this.isAnswered.set(socket, false);
+      this.scoreboard.set(user, 0);
+    });
+
   }
 
   // Fetch the words and generate questions
@@ -54,7 +60,7 @@ class Room {
 
   // Fetch the words from database
   getWords = async () => {
-    return Question.find({}, `${this.languages.from} ${this.languages.to}`)
+    return Question.find({category: this.category}, `${this.languages.from} ${this.languages.to}`)
       .then((words) => {
         return words;
       })
@@ -80,15 +86,20 @@ class Room {
   generateQuestion = () => {
     return {
       prompt: this.getCurrentPromt(),
-      choices: this.generateChoices(this.questionOrder[this.currentQuestion])
+      choices: this.generateChoices(this.questionOrder[this.currentQuestion]),
+      'current-question' : this.currentQuestion
     }
   }
 
   startGame = () => {
+    const usersArray = [];
+    this.users.forEach( (val, key) => usersArray.push(val.username))
+
+    console.log(`[START GAME] Game starting between ${usersArray[0]} and ${usersArray[1]}`);
     this.roomSocket.emit("START GAME", {
       roomId: this.roomId,
       questionNumber: this.questionNumber,
-      users: this.users.map((user) => user.username)
+      users: Object.values(this.users).map((user) => user.username)
     });
   }
 
@@ -112,6 +123,35 @@ class Room {
   sendQuestion = () => {
     const question = this.generateQuestion();
     this.roomSocket.emit("QUESTION", question);
+    console.log("[QUESTION]");
+  }
+
+  checkAnswer = (socket, answer) => {
+  
+    this.isAnswered.set(socket, true);
+    
+    if ([...this.isAnswered.values()].every((answered) => answered )) {
+      console.log(`[END QUESTION] Correct Answer: ${this.questionOrder[this.currentQuestion][this.languages.to]}`);
+      this.roomSocket.emit("END QUESTION", {
+        'correct-answer' : this.questionOrder[this.currentQuestion][this.languages.to]
+      });
+      
+      this.users.forEach( (user, socket) => this.isAnswered.set(socket, false));
+      this.currentQuestion++;
+      
+      if (this.currentQuestion == this.questionNumber) {
+        // END GAME
+        setTimeout(function () {}, 3000);
+      } else {
+        // NEXT QUESTION
+        setTimeout(this.sendQuestion, 3000);
+      }
+    } 
+    // console.log(this.users.get(socket).username);
+  }
+
+  endGame = () => {
+    this.roomSocket.emit("END GAME")
   }
 }
 
