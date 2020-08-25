@@ -25,7 +25,7 @@ READY - Users to server. When both users are ready, send the question
 
 QUESTION - Starts round. Server to user.
 {
-    'question' : 'hello',
+    'prompt' : 'hello',
     'choices' : []
     // Question geldiginde countdown baslat
 }
