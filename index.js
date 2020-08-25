@@ -40,11 +40,11 @@ app.get('/', (req, res) => {
 });
 
 io.on('connection', (socket) => {
-  console.log('A user connected!');
+  console.log('[CONNECTED]');
   connectedUsers[socket] = null;
 
   socket.on('disconnect', () => {
-    console.log('user disconnected');
+    console.log('[DISCONNECTED]');
 
     // Remove the user from the waiting list
     // Time complexity O(n)
@@ -61,7 +61,7 @@ io.on('connection', (socket) => {
    * @param {('en' | 'tr')} to - Answer language
   */
   socket.on("JOIN ROOM", (object) => {
-    console.log(`${object.username} is looking for room`);
+    console.log(`[JOIN ROOM] ${object.username} is looking for room`);
 
     // If there is another user waiting for a game
     // put them in the same room and start the game
@@ -76,20 +76,24 @@ io.on('connection', (socket) => {
       */
       // TODO: decide on users' object structure
       
-      const users = {};
+      const users = new Map();
 
-      users[socket] = {
+      // console.log(`[DEBUG] ${JSON.stringify(waitingUsers[0])}`)
+      users.set(socket, {
         username: object.username,
-      }
+      });
 
-      users[waitingUsers[0].socket] = {
+      users.set(waitingUsers[0].socket, {
         username: waitingUsers[0].username
-      }
+      });
       
-      // const users = [waitingUsers[0], {
-      //   username: object.username,
-      //   socket
-      // }];
+      console.log(`${JSON.stringify(users)}`);
+      
+      /* 
+      {
+        'socket' : { username: 'kaan' }
+      }
+      */
       
       const room = new Room(roomId, roomSocket, users, object.category, 5, object.languages);
 
@@ -122,20 +126,9 @@ io.on('connection', (socket) => {
   })
 
   socket.on('ANSWER', (object) => {
-    console.log(`User: ${object.user} Answer: ${object.answer}`);
+    console.log(`[ANSWER] User: ${object.user} Answer: ${object.answer}`);
     connectedUsers[socket].checkAnswer(socket, object.answer);
     // Iki kullanici da cevapladiysa ya da timer bitti ise END QUESTION gonder
-    socket.emit("END QUESTION", () => {
-      // Soru sayisina ulasilmadiysa
-      socket.emit("QUESTION", () => {
-
-      });
-
-      // Sorular bittiyse
-      socket.emit("END GAME", () => {
-
-      });
-    });
   });
 
   // // Iki cevap gelmedi ama timer bittiyse
