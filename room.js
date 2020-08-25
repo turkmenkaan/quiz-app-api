@@ -10,7 +10,7 @@ class Room {
   /**
    * 
    * @param {} roomSocket 
-   * @param {Array} users
+   * @param {Object} users
    * @param {String} category 
    * @param {Integer} questionNumber 
    * @param {Object} languages
@@ -22,7 +22,11 @@ class Room {
   constructor(roomId, roomSocket, users, category, questionNumber, languages) {
     this.roomId = roomId;
     this.roomSocket = roomSocket;
-    
+    /*
+    {
+      socket: user
+    }
+    */
     this.users = users;
     this.category = category;
     this.questionNumber = questionNumber;
@@ -30,8 +34,8 @@ class Room {
     this.languages = languages;
     // Create a map [[socket1, false], [socket2, false]]
     this.isReady = new Map();
-    users.forEach((user) => {
-      this.isReady.set(user.socket, false)
+    Object.keys(users).forEach((socket) => {
+      this.isReady.set(socket, false)
     });
     this.currentQuestion = 0; // Question index
   }
@@ -88,7 +92,7 @@ class Room {
     this.roomSocket.emit("START GAME", {
       roomId: this.roomId,
       questionNumber: this.questionNumber,
-      users: this.users.map((user) => user.username)
+      users: Object.values(this.users).map((user) => user.username)
     });
   }
 

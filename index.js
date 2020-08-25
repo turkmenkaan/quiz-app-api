@@ -76,21 +76,29 @@ io.on('connection', (socket) => {
       */
       // TODO: decide on users' object structure
       
-      const users = {};
+      const users = new Map();
 
-      users[socket] = {
-        username: object.username,
-      }
+      users.set(socket, {
+        username: object.username
+      });
 
-      users[waitingUsers[0].socket] = {
+      // users[socket] = {
+      //   username: object.username,
+      // }
+
+      users.set(waitingUsers[0].socket, {
         username: waitingUsers[0].username
-      }
+      });
+
+      // users[waitingUsers[0].socket] = {
+      //   username: waitingUsers[0].username
+      // }
       
       // const users = [waitingUsers[0], {
       //   username: object.username,
       //   socket
       // }];
-      
+
       const room = new Room(roomId, roomSocket, users, object.category, 5, object.languages);
 
       connectedUsers[socket] = room;
