@@ -132,20 +132,23 @@ class Room {
 
   checkAnswer = (socket, answer) => {
   
+    const correctAnswer = this.questionOrder[this.currentQuestion][this.languages.to];
     this.isAnswered.set(socket, true);
     
     if ([...this.isAnswered.values()].every((answered) => answered )) {
-      console.log(`[END QUESTION] Correct Answer: ${this.questionOrder[this.currentQuestion][this.languages.to]}`);
+      console.log(`[END QUESTION] Correct Answer: ${correctAnswer}`);
       this.roomSocket.emit("END QUESTION", {
-        'correct-answer' : this.questionOrder[this.currentQuestion][this.languages.to]
+        'correct-answer' : correctAnswer
       });
       
       this.users.forEach( (user, socket) => this.isAnswered.set(socket, false));
       this.currentQuestion++;
+
+      this.scoreboard.set(this.users.get(socket), this.scoreboard.get(this.users.get(socket) + 1))
       
       if (this.currentQuestion == this.questionNumber) {
         // END GAME
-        setTimeout(function () {}, 3000);
+        setTimeout(this.endGame, 3000);
       } else {
         // NEXT QUESTION
         setTimeout(this.sendQuestion, 3000);
@@ -154,8 +157,19 @@ class Room {
     // console.log(this.users.get(socket).username);
   }
 
+  /*
+   SCOREBOARD
+    {
+      'kaan' : 5,
+      'sahircan' : 10
+    }
+  */
   endGame = () => {
-    this.roomSocket.emit("END GAME")
+    console.log("[END GAME]")
+    this.roomSocket.emit("END GAME", {
+      scoreboard : Object.fromEntries(this.scoreboard.entries()),
+      winner : [...this.scoreboard.entries()].reduce((a, e) => e[1] > a[1] ? e : a)[0]
+    })
   }
 }
 
