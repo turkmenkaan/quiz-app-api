@@ -22,6 +22,7 @@ class Room {
   constructor(roomId, roomSocket, users, category, questionNumber, languages) {
     this.roomId = roomId;
     this.roomSocket = roomSocket;
+    
     this.users = users;
     this.category = category;
     this.questionNumber = questionNumber;
