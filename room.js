@@ -33,6 +33,7 @@ class Room {
     this.isAnswered = new Map();
     this.scoreboard = new Map();
     this.currentQuestion = 0; // Question index
+    this.timer = 60; // Temporarily hard coded
 
     this.users.forEach( (user, socket) => {
       this.isReady.set(socket, false);
@@ -93,13 +94,16 @@ class Room {
 
   startGame = () => {
     const usersArray = [];
-    this.users.forEach( (val, key) => usersArray.push(val.username))
+    this.users.forEach( (val, key) => usersArray.push(val.username));
+    this.timer = 60;
+    this.currentQuestion = 0;
 
     console.log(`[START GAME] Game starting between ${usersArray[0]} and ${usersArray[1]}`);
     this.roomSocket.emit("START GAME", {
       roomId: this.roomId,
       questionNumber: this.questionNumber,
-      users: Object.values(this.users).map((user) => user.username)
+      users: Object.values(this.users).map((user) => user.username),
+      timer: this.timer
     });
   }
 
@@ -124,6 +128,13 @@ class Room {
     const question = this.generateQuestion();
     this.roomSocket.emit("QUESTION", question);
     console.log("[QUESTION]");
+    this.isTimeUp = false;
+    this.timeout = setTimeout(this.timeUp, this.timer * 1000);
+  }
+
+  timeUp = () => {
+    this.isTimeUp = true;
+    this.checkAnswer();
   }
 
   checkAnswer = (socket, answer) => {
@@ -131,7 +142,11 @@ class Room {
     const correctAnswer = this.questionOrder[this.currentQuestion][this.languages.to];
     this.isAnswered.set(socket, true);
     
-    if ([...this.isAnswered.values()].every((answered) => answered )) {
+    // Check if both users answered
+    if ([...this.isAnswered.values()].every((answered) => answered ) || this.isTimeUp) {
+      if (this.isTimeUp) {
+        console.log('[TIME UP]')
+      }
       console.log(`[END QUESTION] Correct Answer: ${correctAnswer}`);
       this.roomSocket.emit("END QUESTION", {
         'correct-answer' : correctAnswer
@@ -140,17 +155,21 @@ class Room {
       this.users.forEach( (user, socket) => this.isAnswered.set(socket, false));
       this.currentQuestion++;
 
-      this.scoreboard.set(this.users.get(socket), this.scoreboard.get(this.users.get(socket) + 1))
-      
-      if (this.currentQuestion == this.questionNumber) {
-        // END GAME
-        setTimeout(this.endGame, 3000);
-      } else {
-        // NEXT QUESTION
-        setTimeout(this.sendQuestion, 3000);
-      }
-    } 
+      this.scoreboard.set(this.users.get(socket), this.scoreboard.get(this.users.get(socket) + 1));
+      clearTimeout(this.timeout);
+      this.nextQuestion();
+    }
     // console.log(this.users.get(socket).username);
+  }
+
+  nextQuestion = () => {
+    if (this.currentQuestion == this.questionNumber) {
+      // END GAME
+      setTimeout(this.endGame, 3000);
+    } else {
+      // NEXT QUESTION
+      setTimeout(this.sendQuestion, 3000);
+    }
   }
 
   /*
@@ -165,7 +184,8 @@ class Room {
     this.roomSocket.emit("END GAME", {
       scoreboard : Object.fromEntries(this.scoreboard.entries()),
       winner : [...this.scoreboard.entries()].reduce((a, e) => e[1] > a[1] ? e : a)[0]
-    })
+    });
+    this.currentQuestion = 0;
   }
 }
 

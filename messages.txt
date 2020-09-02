@@ -14,7 +14,8 @@ START GAME - Server to user.
             "username" : "sahircan"
         }
         ],
-    'question-number' : 5
+    'question-number' : 5,
+    'countdown': 5
 }
 
 READY - Users to server. When both users are ready, send the question
