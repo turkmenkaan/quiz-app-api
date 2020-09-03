@@ -6,6 +6,8 @@ const Question = require("./model");
 // Not an in place function
 const shuffle = require("lodash.shuffle");
 
+TIMER = 10; // Temporarily hard coded
+
 class Room {
   /**
    * 
@@ -37,7 +39,7 @@ class Room {
     this.isAnswered = new Map();
     this.scoreboard = new Map();
     this.currentQuestion = 0; // Question index
-    this.timer = 60; // Temporarily hard coded
+    this.timer = TIMER; 
 
     this.users.forEach( (user, socket) => {
       this.isReady.set(socket, false);
@@ -99,7 +101,7 @@ class Room {
   startGame = () => {
     const usersArray = [];
     this.users.forEach( (val, key) => usersArray.push(val.username));
-    this.timer = 60;
+    this.timer = TIMER;
     this.currentQuestion = 0;
 
     console.log(`[START GAME] Game starting between ${usersArray[0]} and ${usersArray[1]}`);
@@ -160,6 +162,7 @@ class Room {
       this.currentQuestion++;
 
       this.scoreboard.set(this.users.get(socket), this.scoreboard.get(this.users.get(socket) + 1));
+      // FIXME: Bazen eğer cevabı iki kişi de zaman bitmeden verdiyse clear'lamıyor!
       clearTimeout(this.timeout);
       this.nextQuestion();
     }
