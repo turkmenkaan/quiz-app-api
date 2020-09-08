@@ -1,10 +1,3 @@
-// TODO: Cevap gelince kontrol et
-// TODO: Yeni soru
-// TODO: Oyun sırasında bir kişi disconnect ederse handle'la
-// TODO: Timer
-// TODO: Oyun bitince oyunu rooms'dan sil
-// LEAVE GAME mesajını handle'la
-
 const app = require('express')();
 const http = require('http').createServer(app);
 const io = require('socket.io')(http);
@@ -20,6 +13,12 @@ const port = process.env.PORT || 3000;
 const rooms = {};
 let waitingUsers = [];
 
+/**
+ * {
+ *  socket : room
+ *  ...
+ * }
+ */
 const connectedUsers = {};
 
 mongoose.connect(process.env.DB_URI, {
@@ -43,6 +42,7 @@ io.on('connection', (socket) => {
   console.log('[CONNECTED]');
   connectedUsers[socket] = null;
 
+  // TODO: Oyun sırasında bir kişi disconnect ederse handle'la
   socket.on('disconnect', () => {
     console.log('[DISCONNECTED]');
 
@@ -74,7 +74,6 @@ io.on('connection', (socket) => {
           "to" : "tr"
       };
       */
-      // TODO: decide on users' object structure
       
       const users = new Map();
 
@@ -136,6 +135,8 @@ io.on('connection', (socket) => {
 
   // });
 
+  // TODO: Oyun bitince oyunu rooms'dan sil
+  // TODO: LEAVE GAME mesajını handle'la
   socket.on("LEAVE GAME", (object) => {
 
   });
