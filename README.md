@@ -1,6 +1,7 @@
 # quiz-app-api
 
-A standalone API to serve the back-end needs of a mobile language learning game. 
+A standalone API to serve the back-end needs of a mobile app. This app aims to bring a gamified approach to language learning
+to ease the process of learning vocabulary.
 
 ### Technologies Used
 
