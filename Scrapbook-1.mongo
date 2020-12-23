@@ -1,0 +1,11 @@
+db.users.insertMany([
+    {
+        name: 'Sahircan'
+    }, 
+    {
+        name: 'Ege'
+    },
+    {
+        name: 'Kaya'
+    }
+])

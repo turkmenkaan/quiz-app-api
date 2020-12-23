@@ -33,10 +33,24 @@ mongoose.connect(process.env.DB_URI, {
     console.log(err);
   });
 
+  const User = mongoose.model('User', mongoose.Schema({
+    name: String
+  }));
+  
+  app.get('/', (req, res) => {
+    res.sendFile(__dirname + '/index.html');
+  });
 
-app.get('/', (req, res) => {
-  res.sendFile(__dirname + '/index.html');
-});
+  app.get('/users', (req, res) => {
+    const users = User.find( function(err, users) {
+      let html = "";
+      users.forEach(user => {
+        html += "- " + user['name'] + "<br>";
+      });
+      console.log(html);
+      res.send(html);
+    });
+  })
 
 io.on('connection', (socket) => {
   console.log('[CONNECTED]');
