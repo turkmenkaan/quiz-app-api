@@ -4,7 +4,7 @@ const io = require('socket.io')(http);
 const mongoose = require('mongoose');
 const { v4: uuidv4 } = require('uuid');
 
-const Question = require('./model').Question;
+const Question = require('./model');
 const Room = require('./room').Room;
 require('dotenv').config();
 
@@ -33,30 +33,32 @@ mongoose.connect(process.env.DB_URI, {
     console.log(err);
   });
 
-  const User = mongoose.model('User', mongoose.Schema({
-    name: String
-  }));
-  
-  app.get('/', (req, res) => {
-    res.sendFile(__dirname + '/index.html');
-  });
+const User = mongoose.model('User', mongoose.Schema({
+  name: String
+}));
 
-  app.get('/users', (req, res) => {
-    const users = User.find( function(err, users) {
-      let html = "";
-      users.forEach(user => {
-        html += "- " + user['name'] + "<br>";
-      });
-      console.log(html);
-      res.send(html);
+app.get('/', (req, res) => {
+  res.sendFile(__dirname + '/index.html');
+});
+
+app.get('/users', (req, res) => {
+  const users = User.find(function (err, users) {
+    let html = "";
+    users.forEach(user => {
+      html += "- " + user['name'] + "<br>";
     });
-  })
+    console.log(html);
+    res.send(html);
+  });
+})
 
-  app.get('/words', (req, res) => {
-    const words = Question.find(function(err, words) {
-      res.send(word);
+app.get('/words', (req, res) => {
+  const words = Question.find({})
+    .then((words) => {
+      console.log(words);
+      res.send(words);
     })
-  })
+})
 
 io.on('connection', (socket) => {
   console.log('[CONNECTED]');
@@ -94,7 +96,7 @@ io.on('connection', (socket) => {
           "to" : "tr"
       };
       */
-      
+
       const users = new Map();
 
       // console.log(`[DEBUG] ${JSON.stringify(waitingUsers[0])}`)
@@ -105,15 +107,15 @@ io.on('connection', (socket) => {
       users.set(waitingUsers[0].socket, {
         username: waitingUsers[0].username
       });
-      
+
       console.log(`${JSON.stringify(users)}`);
-      
+
       /* 
       {
         'socket' : { username: 'kaan' }
       }
       */
-      
+
       const room = new Room(roomId, roomSocket, users, object.category, 5, object.languages);
 
       connectedUsers[socket] = room;
