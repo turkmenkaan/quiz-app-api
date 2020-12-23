@@ -52,6 +52,12 @@ mongoose.connect(process.env.DB_URI, {
     });
   })
 
+  app.get('/words', (req, res) => {
+    const words = Question.find(function(err, words) {
+      res.send(word);
+    })
+  })
+
 io.on('connection', (socket) => {
   console.log('[CONNECTED]');
   connectedUsers[socket] = null;
