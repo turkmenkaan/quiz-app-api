@@ -113,11 +113,6 @@ class Room {
     });
   }
 
-  // FIXME: Unnecessary
-  // Both users are ready, send the socket message
-  sendReady = () => {
-    this.roomSocket.emit("READY");
-  }
 
   // Set ready for a user
   userReady = (user) => {
