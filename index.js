@@ -2,6 +2,7 @@ const app = require('express')();
 const http = require('http').createServer(app);
 const io = require('socket.io')(http);
 const mongoose = require('mongoose');
+const admin = require('firebase-admin');
 const { v4: uuidv4 } = require('uuid');
 
 const Question = require('./model');
@@ -10,16 +11,19 @@ require('dotenv').config();
 
 const port = process.env.PORT || 3000;
 
-const rooms = {};
-let waitingUsers = [];
-
 /**
  * {
- *  socket : room
+ *  socket : room (object)
  *  ...
  * }
  */
 const connectedUsers = {};
+
+/**
+ * roomId: room (object)
+ */
+const rooms = {};
+let waitingUsers = [];
 
 mongoose.connect(process.env.DB_URI, {
   useNewUrlParser: true,
@@ -64,9 +68,17 @@ io.on('connection', (socket) => {
   console.log('[CONNECTED]');
   connectedUsers[socket] = null;
 
-  // TODO: Oyun sırasında bir kişi disconnect ederse handle'la
   socket.on('disconnect', () => {
     console.log('[DISCONNECTED]');
+
+    // If the user is in a room
+    if (connectedUsers[socket]) {
+      const activeRoom = connectedUsers[socket];      
+      console.log("[DISCONNECTED] In a room");
+      activeRoom.endGame(socket);
+      connectedUsers.delete(socket);
+      rooms = rooms.filter(room => !Object.is(room, activeRoom))
+    }
 
     // Remove the user from the waiting list
     // Time complexity O(n)
@@ -84,6 +96,7 @@ io.on('connection', (socket) => {
   */
   socket.on("JOIN ROOM", (object) => {
     console.log(`[JOIN ROOM] ${object.username} is looking for room`);
+
 
     // If there is another user waiting for a game
     // put them in the same room and start the game
@@ -107,9 +120,11 @@ io.on('connection', (socket) => {
       users.set(waitingUsers[0].socket, {
         username: waitingUsers[0].username
       });
+      
+      // console.log(users);
+      // console.log(`${JSON.stringify(users)}`);
 
-      console.log(`${JSON.stringify(users)}`);
-
+      
       /* 
       {
         'socket' : { username: 'kaan' }
@@ -131,7 +146,8 @@ io.on('connection', (socket) => {
         username: object.username,
         socket,
       });
-    }
+    }   
+    
   });
 
   socket.on("READY", (object) => {
@@ -160,7 +176,7 @@ io.on('connection', (socket) => {
   // TODO: Oyun bitince oyunu rooms'dan sil
   // TODO: LEAVE GAME mesajını handle'la
   socket.on("LEAVE GAME", (object) => {
-
+    console.log("[LEAVE GAME]")
   });
 })
 
