@@ -2,6 +2,11 @@
 JOIN ROOM
 {
     'username' : 'sahircan',
+    'languages' : {
+        'from' : 'en',
+        'to' : 'tr'
+    },
+    'category' : 'fruits',
 }
 
 START GAME - Server to user.
@@ -39,22 +44,13 @@ ANSWER - User to Server. User 1's answer
 
 END QUESTION - Server to room.
 {
-    'answers' : [
-        {
-            'user' : 'kaan',
-            'answer' : null,
-        },
-        {
-            'user' : 'sahircan',
-            'answer' : 'avokado'
-        }
-    ],
-    'correct-answer' : 'merhaba'
+    'correct-answer' : 'merhaba',
+    'timeout' : true
 }
 
 QUESTION
 
-ENDGAME
+END GAME
 {
     'scoreboard' : [
         {
@@ -68,3 +64,5 @@ ENDGAME
     ],
     'winner' : 'kaan'
 }
+
+LEAVE GAME

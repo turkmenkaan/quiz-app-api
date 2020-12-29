@@ -1,4 +1,5 @@
-db.words.insertMany([
+db.words.insertMany(
+[
  {
   "_id": {
     "$oid": "5f3d8ebf15c5dc958ca16cce"
@@ -176,4 +177,5 @@ db.words.insertMany([
   "category": "fruits",
   "en": "pineapple",
   "tr": "ananas"
-}])
+}
+])
