@@ -4,65 +4,49 @@ const io = require('socket.io')(http);
 const mongoose = require('mongoose');
 const admin = require('firebase-admin');
 const { v4: uuidv4 } = require('uuid');
+const cookieParser = require('cookie-parser');
+const bodyParser = require('body-parser');
+const UserController = require('./controllers/user.controller');
+const QuestionController = require('./controllers/question.controller')
 
-const Question = require('./model');
 const Room = require('./room').Room;
 require('dotenv').config();
 
+
 const port = process.env.PORT || 3000;
-
-/**
- * {
- *  socket : room (object)
- *  ...
- * }
- */
-const connectedUsers = {};
-
-/**
- * roomId: room (object)
- */
-const rooms = {};
+const connectedUsers = {};  // { socket : room (object) }
+const rooms = {};  // { roomId: room (object) }
 let waitingUsers = [];
+
+admin.initializeApp({
+  credential: admin.credential.cert(process.env.GOOGLE_APPLICATION_CREDENTIALS),
+})
+
+app.use(cookieParser());
+app.use(bodyParser.json());
 
 mongoose.connect(process.env.DB_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
   useCreateIndex: true
 })
-  .then(() => {
-    console.log("Database connection established!");
-  })
-  .catch((err) => {
-    console.log(err);
-  });
+.then(() => {
+  console.log("Database connection established!");
+})
+.catch((err) => {
+  console.log(err);
+});
 
-const User = mongoose.model('User', mongoose.Schema({
-  name: String
-}));
 
 app.get('/', (req, res) => {
   res.sendFile(__dirname + '/index.html');
 });
 
-app.get('/users', (req, res) => {
-  const users = User.find(function (err, users) {
-    let html = "";
-    users.forEach(user => {
-      html += "- " + user['name'] + "<br>";
-    });
-    console.log(html);
-    res.send(html);
-  });
-})
+app.get('/users', UserController.index);
+app.get('/user/:uid', UserController.show);
+app.post('/users', UserController.store);
 
-app.get('/words', (req, res) => {
-  const words = Question.find({})
-    .then((words) => {
-      console.log(words);
-      res.send(words);
-    })
-})
+app.get('/words', QuestionController.index);
 
 io.on('connection', (socket) => {
   console.log('[CONNECTED]');
@@ -73,7 +57,7 @@ io.on('connection', (socket) => {
 
     // If the user is in a room
     if (connectedUsers[socket]) {
-      const activeRoom = connectedUsers[socket];      
+      const activeRoom = connectedUsers[socket];
       console.log("[DISCONNECTED] In a room");
       activeRoom.endGame(socket);
       connectedUsers.delete(socket);
@@ -120,11 +104,11 @@ io.on('connection', (socket) => {
       users.set(waitingUsers[0].socket, {
         username: waitingUsers[0].username
       });
-      
+
       // console.log(users);
       // console.log(`${JSON.stringify(users)}`);
 
-      
+
       /* 
       {
         'socket' : { username: 'kaan' }
@@ -146,8 +130,8 @@ io.on('connection', (socket) => {
         username: object.username,
         socket,
       });
-    }   
-    
+    }
+
   });
 
   socket.on("READY", (object) => {

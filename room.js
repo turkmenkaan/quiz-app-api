@@ -1,5 +1,5 @@
 // Question model for the database
-const Question = require("./model");
+const Question = require("./models/question.model");
 
 // shuffle function from the lodash module
 // Runtime complexity O(n)
