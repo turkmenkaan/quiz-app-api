@@ -7,7 +7,8 @@ const { v4: uuidv4 } = require('uuid');
 const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
 const UserController = require('./controllers/user.controller');
-const QuestionController = require('./controllers/question.controller')
+const QuestionController = require('./controllers/question.controller');
+const Middleware = require('./middlewares');
 
 const Room = require('./room').Room;
 require('dotenv').config();
@@ -24,32 +25,49 @@ admin.initializeApp({
 
 app.use(cookieParser());
 app.use(bodyParser.json());
+// app.use('/users', Middleware.isAuthenticated);
 
 mongoose.connect(process.env.DB_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
   useCreateIndex: true
 })
-.then(() => {
-  console.log("Database connection established!");
-})
-.catch((err) => {
-  console.log(err);
-});
+  .then(() => {
+    console.log("Database connection established!");
+  })
+  .catch((err) => {
+    console.log(err);
+  });
 
 
 app.get('/', (req, res) => {
   res.sendFile(__dirname + '/index.html');
 });
 
-app.get('/users', UserController.index);
+app.get('/users', Middleware.isAuthenticated, UserController.index);
 app.get('/user/:uid', UserController.show);
 app.post('/users', UserController.store);
 
 app.get('/words', QuestionController.index);
 
+// io.use((socket, next) => {
+  
+// })
+
 io.on('connection', (socket) => {
+  // const authorizationHeader = req.headers['authorization'] ? req.headers['authorization'].split(" ")[1] : '';
   console.log('[CONNECTED]');
+
+  // admin.auth().verifyIdToken(authorizationHeader)
+  //   .then((decodedClaims) => {
+  //     // console.log(decodedClaims);
+  //     console.log('[CONNECTED]');
+  //   })
+  //   .catch((error) => {
+  //     console.log("[ERROR] Not authenticated, DISCONNECTED");
+  //     socket.close();
+  //   });
+
   connectedUsers[socket] = null;
 
   socket.on('disconnect', () => {
