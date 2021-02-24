@@ -1,0 +1,7 @@
+(DIS)CONNECTION SCENARIOS
+
+- Uygulama arka plana atınca DISCONNECT etmiyor.
+- Ekran kitlenince DISCONNECT etmiyor.
+- Uygulama kullanılan uygulamalardna silinirse DISCONNECT ediyor.
+- Telefon kapatınca DISCONNECT ediyor.
+- Internet giderse bir süre pinglemeye başlıyor 5-10sn gibi bir süre sonra DISCONNECT ediyor.

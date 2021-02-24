@@ -1,0 +1,31 @@
+asyncapi: 2.0.0
+info:
+  title: Quiz App API
+  version: 1.0.0
+  description: Node.js back-end utilizing the WebSockets technology for an online Event-Driven quiz competition app
+channels:
+  room:
+    description: This channel is for exchanging WebSockets messages in a game room
+    join-room:
+      summary: A user is looking for a room
+      message:
+        description: This message is sent when a user starts looking for a room. If there's another user looking for a room, two users will be matched
+        payload:
+          type: object
+          properties:
+            username:
+              $ref: "#/components/schemas/User"
+
+    start-game:
+      summary: Enough users are joined a room, starting the game
+
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string

@@ -2,24 +2,30 @@ const app = require('express')();
 const http = require('http').createServer(app);
 const io = require('socket.io')(http);
 const mongoose = require('mongoose');
+const admin = require('firebase-admin');
 const { v4: uuidv4 } = require('uuid');
+const cookieParser = require('cookie-parser');
+const bodyParser = require('body-parser');
+const UserController = require('./controllers/user.controller');
+const QuestionController = require('./controllers/question.controller');
+const Middleware = require('./middlewares');
 
-const Question = require('./model').Question;
 const Room = require('./room').Room;
 require('dotenv').config();
 
-const port = process.env.PORT || 3000;
 
-const rooms = {};
+const port = process.env.PORT || 3000;
+const connectedUsers = {};  // { socket : room (object) }
+const rooms = {};  // { roomId: room (object) }
 let waitingUsers = [];
 
-/**
- * {
- *  socket : room
- *  ...
- * }
- */
-const connectedUsers = {};
+admin.initializeApp({
+  credential: admin.credential.cert(process.env.GOOGLE_APPLICATION_CREDENTIALS),
+})
+
+app.use(cookieParser());
+app.use(bodyParser.json());
+// app.use('/users', Middleware.isAuthenticated);
 
 mongoose.connect(process.env.DB_URI, {
   useNewUrlParser: true,
@@ -38,11 +44,32 @@ app.get('/', (req, res) => {
   res.sendFile(__dirname + '/index.html');
 });
 
+app.get('/users', Middleware.isAuthenticated, UserController.index);
+app.get('/user/:uid', UserController.show);
+app.post('/users', UserController.store);
+
+app.get('/words', QuestionController.index);
+
+// io.use((socket, next) => {
+  
+// })
+
 io.on('connection', (socket) => {
+  // const authorizationHeader = req.headers['authorization'] ? req.headers['authorization'].split(" ")[1] : '';
   console.log('[CONNECTED]');
+
+  // admin.auth().verifyIdToken(authorizationHeader)
+  //   .then((decodedClaims) => {
+  //     // console.log(decodedClaims);
+  //     console.log('[CONNECTED]');
+  //   })
+  //   .catch((error) => {
+  //     console.log("[ERROR] Not authenticated, DISCONNECTED");
+  //     socket.close();
+  //   });
+
   connectedUsers[socket] = null;
 
-  // TODO: Oyun sırasında bir kişi disconnect ederse handle'la
   socket.on('disconnect', () => {
     console.log('[DISCONNECTED]');
 
@@ -72,6 +99,7 @@ io.on('connection', (socket) => {
   socket.on("JOIN ROOM", (object) => {
     console.log(`[JOIN ROOM] ${JSON.stringify(object)} is looking for room`);
 
+
     // If there is another user waiting for a game
     // put them in the same room and start the game
     if (waitingUsers.length > 0) {
@@ -83,7 +111,7 @@ io.on('connection', (socket) => {
           "to" : "tr"
       };
       */
-      
+
       const users = new Map();
 
       // console.log(`[DEBUG] ${JSON.stringify(waitingUsers[0])}`)
@@ -94,15 +122,17 @@ io.on('connection', (socket) => {
       users.set(waitingUsers[0].socket, {
         username: waitingUsers[0].username
       });
-      
-      console.log(`${JSON.stringify(users)}`);
-      
+
+      // console.log(users);
+      // console.log(`${JSON.stringify(users)}`);
+
+
       /* 
       {
         'socket' : { username: 'kaan' }
       }
       */
-      
+
       const room = new Room(roomId, roomSocket, users, object.category, 5, object.languages);
 
       connectedUsers[socket] = room;
@@ -119,6 +149,7 @@ io.on('connection', (socket) => {
         socket,
       });
     }
+
   });
 
   socket.on("READY", (object) => {
@@ -150,7 +181,7 @@ io.on('connection', (socket) => {
   // TODO: Oyun bitince oyunu rooms'dan sil
   // TODO: LEAVE GAME mesajını handle'la
   socket.on("LEAVE GAME", (object) => {
-
+    console.log("[LEAVE GAME]")
   });
 })
 
