@@ -67,7 +67,7 @@ class Room {
 
   // Fetch the words from database
   getWords = async () => {
-    return Question.find({category: this.category}, `${this.languages.from} ${this.languages.to}`)
+    return Question.find({category: this.category}, `id ${this.languages.from} ${this.languages.to}`)
       .then((words) => {
         return words;
       })
@@ -86,7 +86,10 @@ class Room {
     return shuffle([
       question,
       ...shuffle(this.words.filter((word) => word !== question)).slice(0, this.choiceNumber - 1)
-    ]).map((word) => word[this.languages.to]);
+    ]).map((word) => ({
+      choice: word[this.languages.to],
+      id: word._id
+    }));
   }
 
   // Generate the complete question
@@ -108,7 +111,7 @@ class Room {
     this.roomSocket.emit("START GAME", {
       roomId: this.roomId,
       questionNumber: this.questionNumber,
-      users: Object.values(this.users).map((user) => user.username),
+      users: usersArray,
       timer: this.timer
     });
   }
@@ -133,7 +136,7 @@ class Room {
   sendQuestion = () => {
     const question = this.generateQuestion();
     this.roomSocket.emit("QUESTION", question);
-    console.log("[QUESTION]");
+    console.log("[QUESTION]", question);
     this.isTimeUp = false;
     this.timeout = setTimeout(this.timeUp, this.timer * 1000);
   }

@@ -46,6 +46,15 @@ io.on('connection', (socket) => {
   socket.on('disconnect', () => {
     console.log('[DISCONNECTED]');
 
+    // If the user is in a room
+    if (connectedUsers[socket]) {
+      const activeRoom = connectedUsers[socket];      
+      console.log("[DISCONNECTED] In a room");
+      activeRoom.endGame(socket);
+      delete connectedUsers[socket];
+      delete activeRoom;
+    }
+
     // Remove the user from the waiting list
     // Time complexity O(n)
     waitingUsers = waitingUsers.filter(user => !(Object.is(socket, user.socket)));
@@ -61,7 +70,7 @@ io.on('connection', (socket) => {
    * @param {('en' | 'tr')} to - Answer language
   */
   socket.on("JOIN ROOM", (object) => {
-    console.log(`[JOIN ROOM] ${object.username} is looking for room`);
+    console.log(`[JOIN ROOM] ${JSON.stringify(object)} is looking for room`);
 
     // If there is another user waiting for a game
     // put them in the same room and start the game
@@ -114,10 +123,13 @@ io.on('connection', (socket) => {
 
   socket.on("READY", (object) => {
     const room = rooms[object.roomId];
-    room.userReady(socket);
+    
+    if (room) {
+      room.userReady(socket);
 
-    if (room.checkReady()) {
-      room.sendQuestion();
+      if (room.checkReady()) {
+        room.sendQuestion();
+      }
     }
 
     // Iki taraftan da ready geldiginde ilk soruyu gonder
