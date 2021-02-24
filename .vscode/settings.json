@@ -1,0 +1,8 @@
+{
+    "appService.defaultWebAppToDeploy": "/subscriptions/9c176b3b-7bb0-4554-89ca-3c1332cb1d31/resourceGroups/appsvc_linux_centralus/providers/Microsoft.Web/sites/quiz-app-9e42",
+    "appService.deploySubpath": ".",
+    "appService.zipIgnorePattern": [
+        "node_modules{,/**}",
+        ".vscode{,/**}"
+    ]
+}

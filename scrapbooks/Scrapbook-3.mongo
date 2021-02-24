@@ -1,0 +1,181 @@
+db.words.insertMany(
+[
+ {
+  "_id": {
+    "$oid": "5f3d8ebf15c5dc958ca16cce"
+  },
+  "en": "hello",
+  "tr": "merhaba",
+  "category": "introductions",
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "5f3d904cd28cc996e4c617ca"
+  },
+  "en": "number",
+  "tr": "sayı",
+  "category": "maths",
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "5f01fc31866c6e24e8034871"
+  },
+  "category": "fruits",
+  "en": "blueberry",
+  "tr": "yaban mersini"
+},{
+  "_id": {
+    "$oid": "5f01fc31866c6e24e8034873"
+  },
+  "category": "fruits",
+  "en": "coconut",
+  "tr": "hindistan cevizi"
+},{
+  "_id": {
+    "$oid": "5f01fc31866c6e24e803486e"
+  },
+  "category": "fruits",
+  "en": "avocado",
+  "tr": "avokado"
+},{
+  "_id": {
+    "$oid": "5f01fc31866c6e24e8034879"
+  },
+  "category": "fruits",
+  "en": "melon",
+  "tr": "kavun"
+},{
+  "_id": {
+    "$oid": "5f01fc31866c6e24e803486c"
+  },
+  "category": "fruits",
+  "en": "apple",
+  "tr": "elma"
+},{
+  "_id": {
+    "$oid": "5f01fc31866c6e24e8034875"
+  },
+  "category": "fruits",
+  "en": "grape",
+  "tr": "üzüm"
+},{
+  "_id": {
+    "$oid": "5f01fc31866c6e24e803486f"
+  },
+  "category": "fruits",
+  "en": "banana",
+  "tr": "muz"
+},{
+  "_id": {
+    "$oid": "5f01fc31866c6e24e803487c"
+  },
+  "category": "fruits",
+  "en": "pear",
+  "tr": "armut"
+},{
+  "_id": {
+    "$oid": "5f01fc31866c6e24e8034881"
+  },
+  "category": "fruits",
+  "en": "strawberry",
+  "tr": "çilek"
+},{
+  "_id": {
+    "$oid": "5f01fc31866c6e24e803487a"
+  },
+  "category": "fruits",
+  "en": "orange",
+  "tr": "portakal"
+},{
+  "_id": {
+    "$oid": "5f01fc31866c6e24e8034877"
+  },
+  "category": "fruits",
+  "en": "kiwifruit",
+  "tr": "kivi"
+},{
+  "_id": {
+    "$oid": "5f01fc31866c6e24e803487b"
+  },
+  "category": "fruits",
+  "en": "peach",
+  "tr": "şeftali"
+},{
+  "_id": {
+    "$oid": "5f01fc31866c6e24e803487e"
+  },
+  "category": "fruits",
+  "en": "plum",
+  "tr": "erik"
+},{
+  "_id": {
+    "$oid": "5f01fc31866c6e24e8034872"
+  },
+  "category": "fruits",
+  "en": "cherry",
+  "tr": "kiraz"
+},{
+  "_id": {
+    "$oid": "5f01fc31866c6e24e8034870"
+  },
+  "category": "fruits",
+  "en": "blackberry",
+  "tr": "böğürtlen"
+},{
+  "_id": {
+    "$oid": "5f01fc31866c6e24e8034882"
+  },
+  "category": "fruits",
+  "en": "watermelon",
+  "tr": "karpuz"
+},{
+  "_id": {
+    "$oid": "5f01fc31866c6e24e803487f"
+  },
+  "category": "fruits",
+  "en": "pomegranate",
+  "tr": "nar"
+},{
+  "_id": {
+    "$oid": "5f01fc31866c6e24e8034876"
+  },
+  "category": "fruits",
+  "en": "grapefruit",
+  "tr": "greyfurt"
+},{
+  "_id": {
+    "$oid": "5f01fc31866c6e24e8034874"
+  },
+  "category": "fruits",
+  "en": "fig",
+  "tr": "incir"
+},{
+  "_id": {
+    "$oid": "5f01fc31866c6e24e803486d"
+  },
+  "category": "fruits",
+  "en": "apricot",
+  "tr": "kayısı"
+},{
+  "_id": {
+    "$oid": "5f01fc31866c6e24e8034880"
+  },
+  "category": "fruits",
+  "en": "raspberry",
+  "tr": "ahududu"
+},{
+  "_id": {
+    "$oid": "5f01fc31866c6e24e8034878"
+  },
+  "category": "fruits",
+  "en": "lemon",
+  "tr": "limon"
+},{
+  "_id": {
+    "$oid": "5f01fc31866c6e24e803487d"
+  },
+  "category": "fruits",
+  "en": "pineapple",
+  "tr": "ananas"
+}
+])

@@ -1,12 +1,13 @@
 // Question model for the database
-const Question = require("./model");
+const Question = require("./models/question.model");
 
 // shuffle function from the lodash module
 // Runtime complexity O(n)
 // Not an in place function
 const shuffle = require("lodash.shuffle");
 
-TIMER = 10; // Temporarily hard coded
+const TIMER = 10; // Temporarily hard coded
+const TIME_TO_QUESTION = 3;
 
 class Room {
   /**
@@ -40,6 +41,7 @@ class Room {
     this.scoreboard = new Map();
     this.currentQuestion = 0; // Question index
     this.timer = TIMER; 
+    this.isActive = true;
 
     this.users.forEach( (user, socket) => {
       this.isReady.set(socket, false);
@@ -113,11 +115,6 @@ class Room {
     });
   }
 
-  // FIXME: Unnecessary
-  // Both users are ready, send the socket message
-  sendReady = () => {
-    this.roomSocket.emit("READY");
-  }
 
   // Set ready for a user
   userReady = (user) => {
@@ -155,7 +152,8 @@ class Room {
       }
       console.log(`[END QUESTION] Correct Answer: ${correctAnswer}`);
       this.roomSocket.emit("END QUESTION", {
-        'correct-answer' : correctAnswer
+        'correct-answer' : correctAnswer,
+        'timeout': this.isTimeUp
       });
       
       this.users.forEach( (user, socket) => this.isAnswered.set(socket, false));
@@ -172,10 +170,10 @@ class Room {
   nextQuestion = () => {
     if (this.currentQuestion == this.questionNumber) {
       // END GAME
-      setTimeout(this.endGame, 3000);
-    } else {
+      setTimeout(this.endGame, TIME_TO_QUESTION * 1000);
+    } else if (this.isActive) {
       // NEXT QUESTION
-      setTimeout(this.sendQuestion, 3000);
+      setTimeout(this.sendQuestion, TIME_TO_QUESTION * 1000);
     }
   }
 
@@ -186,13 +184,28 @@ class Room {
       'sahircan' : 10
     }
   */
-  endGame = () => {
-    console.log("[END GAME]")
+  endGame = (disconnectedSocket) => {
+    let winner;
+    let isDisconnected = false;
+    console.log("[END GAME]");
+
+    if (disconnectedSocket) {
+      const disconnectedUser = this.users[disconnectedSocket];
+      winner = Array.from(this.users.values()).filter(user => user !== disconnectedUser);
+      isDisconnected = true;
+    } else {
+      winner = [...this.scoreboard.entries()].reduce((a, e) => e[1] > a[1] ? e : a)[0];
+    }
+
     this.roomSocket.emit("END GAME", {
       scoreboard : Object.fromEntries(this.scoreboard.entries()),
-      winner : [...this.scoreboard.entries()].reduce((a, e) => e[1] > a[1] ? e : a)[0]
+      winner : winner,
+      isDisconnected : isDisconnected
     });
+    
     this.currentQuestion = 0;
+    this.isActive = false;
+    clearTimeout(this.timeout);
   }
 }
 
