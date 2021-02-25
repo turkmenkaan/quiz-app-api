@@ -132,7 +132,10 @@ class Room {
   // Send a question
   sendQuestion = () => {
     const question = this.generateQuestion();
-    this.roomSocket.emit("QUESTION", question);
+    this.roomSocket.emit("QUESTION", {
+      roomId: this.roomId,
+      ...question
+    });
     console.log("[QUESTION]", question);
     this.isTimeUp = false;
     this.timeout = setTimeout(this.timeUp, this.timer * 1000);
@@ -155,6 +158,7 @@ class Room {
       }
       console.log(`[END QUESTION] Correct Answer: ${correctAnswer}`);
       this.roomSocket.emit("END QUESTION", {
+        roomId: this.roomId,
         'correct-answer' : correctAnswer,
         'timeout': this.isTimeUp
       });
@@ -201,6 +205,7 @@ class Room {
     }
 
     this.roomSocket.emit("END GAME", {
+      roomId: this.roomId,
       scoreboard : Object.fromEntries(this.scoreboard.entries()),
       winner : winner,
       isDisconnected : isDisconnected
