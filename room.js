@@ -175,10 +175,10 @@ class Room {
   }
 
   nextQuestion = () => {
-    if (this.currentQuestion == this.questionNumber) {
+    if (this.currentQuestion === this.questionNumber || !this.isActive) {
       // END GAME
       setTimeout(this.endGame, TIME_TO_QUESTION * 1000);
-    } else if (this.isActive) {
+    } else {
       // NEXT QUESTION
       setTimeout(this.sendQuestion, TIME_TO_QUESTION * 1000);
     }

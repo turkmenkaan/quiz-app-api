@@ -71,11 +71,9 @@ io.on('connection', (socket) => {
   connectedUsers[socket] = null;
 
   socket.on('disconnect', () => {
-    console.log('[DISCONNECTED]');
-
     // If the user is in a room
     if (connectedUsers[socket]) {
-      const activeRoom = connectedUsers[socket];      
+      const activeRoom = connectedUsers[socket];
       console.log("[DISCONNECTED] In a room");
       activeRoom.endGame(socket);
       delete connectedUsers[socket];
@@ -84,7 +82,10 @@ io.on('connection', (socket) => {
 
     // Remove the user from the waiting list
     // Time complexity O(n)
-    waitingUsers = waitingUsers.filter(user => !(Object.is(socket, user.socket)));
+    else {
+      console.log('[DISCONNECTED] not in a room');
+      waitingUsers = waitingUsers.filter(user => !(Object.is(socket, user.socket)));
+    }
   });
 
   /** 
