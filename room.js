@@ -89,7 +89,7 @@ class Room {
       question,
       ...shuffle(this.words.filter((word) => word !== question)).slice(0, this.choiceNumber - 1)
     ]).map((word) => ({
-      choice: word[this.languages.to],
+      label: word[this.languages.to],
       id: word._id
     }));
   }
@@ -145,7 +145,7 @@ class Room {
 
   checkAnswer = (socket, answer) => {
   
-    const correctAnswer = this.questionOrder[this.currentQuestion][this.languages.to];
+    const correctAnswer = this.questionOrder[this.currentQuestion].id;
     this.isAnswered.set(socket, true);
     
     // Check if both users answered
