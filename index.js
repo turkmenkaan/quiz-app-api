@@ -96,7 +96,7 @@ io.on('connection', (socket) => {
    * @param {('en' | 'tr')} from - Question language
    * @param {('en' | 'tr')} to - Answer language
   */
-  socket.on("JOIN ROOM", (object) => {
+  socket.on("JOIN ROOM", (object, callback) => {
     console.log(`[JOIN ROOM] ${JSON.stringify(object)} is looking for room`);
 
 
@@ -148,6 +148,7 @@ io.on('connection', (socket) => {
         username: object.username,
         socket,
       });
+      callback(null, { status: "OK" });
     }
 
   });
