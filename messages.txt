@@ -29,7 +29,7 @@ READY - Users to server. When both users are ready, send the question
     "username" : "kaan"
 }
 
-QUESTION - Starts round. Server to user.
+NEW QUESTION - Starts round. Server to user.
 {
     'prompt' : 'hello',
     'choices' : []
@@ -48,7 +48,7 @@ END QUESTION - Server to room.
     'timeout' : true
 }
 
-QUESTION
+NEW QUESTION
 
 END GAME
 {

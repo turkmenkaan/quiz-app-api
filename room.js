@@ -132,11 +132,11 @@ class Room {
   // Send a question
   sendQuestion = () => {
     const question = this.generateQuestion();
-    this.roomSocket.emit("QUESTION", {
+    this.roomSocket.emit("NEW QUESTION", {
       roomId: this.roomId,
       ...question
     });
-    console.log("[QUESTION]", question);
+    console.log("[NEW QUESTION]", question);
     this.isTimeUp = false;
     this.timeout = setTimeout(this.timeUp, this.timer * 1000);
   }
