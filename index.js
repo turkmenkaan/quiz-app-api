@@ -182,8 +182,14 @@ io.on('connection', (socket) => {
 
   // TODO: Oyun bitince oyunu rooms'dan sil
   // TODO: LEAVE GAME mesajını handle'la
-  socket.on("LEAVE GAME", (object) => {
-    console.log("[LEAVE GAME]")
+  socket.on("LEAVE GAME", () => {
+    const activeRoom = connectedUsers[socket];
+    console.log("[LEAVE GAME]");
+    if (activeRoom) {
+      activeRoom.endGame(socket);
+      delete connectedUsers[socket];
+      delete activeRoom;
+    }
   });
 })
 
