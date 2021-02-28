@@ -1,5 +1,5 @@
 // Question model for the database
-const Question = require("./model");
+const Question = require("./models/question.model");
 
 // shuffle function from the lodash module
 // Runtime complexity O(n)
@@ -69,7 +69,7 @@ class Room {
 
   // Fetch the words from database
   getWords = async () => {
-    return Question.find({category: this.category}, `${this.languages.from} ${this.languages.to}`)
+    return Question.find({category: this.category}, `id ${this.languages.from} ${this.languages.to}`)
       .then((words) => {
         return words;
       })
@@ -88,7 +88,10 @@ class Room {
     return shuffle([
       question,
       ...shuffle(this.words.filter((word) => word !== question)).slice(0, this.choiceNumber - 1)
-    ]).map((word) => word[this.languages.to]);
+    ]).map((word) => ({
+      label: word[this.languages.to],
+      id: word._id
+    }));
   }
 
   // Generate the complete question
@@ -110,7 +113,7 @@ class Room {
     this.roomSocket.emit("START GAME", {
       roomId: this.roomId,
       questionNumber: this.questionNumber,
-      users: Object.values(this.users).map((user) => user.username),
+      users: usersArray,
       timer: this.timer
     });
   }
@@ -129,8 +132,11 @@ class Room {
   // Send a question
   sendQuestion = () => {
     const question = this.generateQuestion();
-    this.roomSocket.emit("QUESTION", question);
-    console.log("[QUESTION]");
+    this.roomSocket.emit("NEW QUESTION", {
+      roomId: this.roomId,
+      ...question
+    });
+    console.log("[NEW QUESTION]", question);
     this.isTimeUp = false;
     this.timeout = setTimeout(this.timeUp, this.timer * 1000);
   }
@@ -142,7 +148,7 @@ class Room {
 
   checkAnswer = (socket, answer) => {
   
-    const correctAnswer = this.questionOrder[this.currentQuestion][this.languages.to];
+    const correctAnswer = this.questionOrder[this.currentQuestion].id;
     this.isAnswered.set(socket, true);
     
     // Check if both users answered
@@ -152,6 +158,7 @@ class Room {
       }
       console.log(`[END QUESTION] Correct Answer: ${correctAnswer}`);
       this.roomSocket.emit("END QUESTION", {
+        roomId: this.roomId,
         'correct-answer' : correctAnswer,
         'timeout': this.isTimeUp
       });
@@ -168,10 +175,10 @@ class Room {
   }
 
   nextQuestion = () => {
-    if (this.currentQuestion == this.questionNumber) {
+    if (this.currentQuestion === this.questionNumber || !this.isActive) {
       // END GAME
       setTimeout(this.endGame, TIME_TO_QUESTION * 1000);
-    } else if (this.isActive) {
+    } else {
       // NEXT QUESTION
       setTimeout(this.sendQuestion, TIME_TO_QUESTION * 1000);
     }
@@ -198,6 +205,7 @@ class Room {
     }
 
     this.roomSocket.emit("END GAME", {
+      roomId: this.roomId,
       scoreboard : Object.fromEntries(this.scoreboard.entries()),
       winner : winner,
       isDisconnected : isDisconnected
