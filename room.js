@@ -146,17 +146,25 @@ class Room {
     this.checkAnswer();
   }
 
+  
+
   checkAnswer = (socket, answer) => {
   
     const correctAnswer = this.questionOrder[this.currentQuestion].id;
     this.isAnswered.set(socket, true);
+      
+    if (answer === correctAnswer) {
+      this.scoreboard.set(this.users.get(socket), this.scoreboard.get(this.users.get(socket)) + 1);
+    }
     
     // Check if both users answered
     if ([...this.isAnswered.values()].every((answered) => answered ) || this.isTimeUp) {
+      
       if (this.isTimeUp) {
         console.log('[TIME UP]')
       }
       console.log(`[END QUESTION] Correct Answer: ${correctAnswer}`);
+
       this.roomSocket.emit("END QUESTION", {
         roomId: this.roomId,
         'correct-answer' : correctAnswer,
@@ -166,12 +174,9 @@ class Room {
       this.users.forEach( (user, socket) => this.isAnswered.set(socket, false));
       this.currentQuestion++;
 
-      this.scoreboard.set(this.users.get(socket), this.scoreboard.get(this.users.get(socket) + 1));
-      // FIXME: Bazen eğer cevabı iki kişi de zaman bitmeden verdiyse clear'lamıyor!
       clearTimeout(this.timeout);
       this.nextQuestion();
-    }
-    // console.log(this.users.get(socket).username);
+    } 
   }
 
   nextQuestion = () => {
@@ -197,8 +202,8 @@ class Room {
     console.log("[END GAME]");
 
     if (disconnectedSocket) {
-      const disconnectedUser = this.users[disconnectedSocket];
-      winner = Array.from(this.users.values()).filter(user => user !== disconnectedUser);
+      const disconnectedUser = this.users.get(disconnectedSocket);
+      winner = Array.from(this.users.values()).filter(user => user !== disconnectedUser)[0];
       isDisconnected = true;
     } else {
       winner = [...this.scoreboard.entries()].reduce((a, e) => e[1] > a[1] ? e : a)[0];

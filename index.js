@@ -6,14 +6,18 @@ const admin = require('firebase-admin');
 const { v4: uuidv4 } = require('uuid');
 const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
+
 const UserController = require('./controllers/user.controller');
 const QuestionController = require('./controllers/question.controller');
+const QueueController = require('./controllers/queue.controller');
+
 const Middleware = require('./middlewares');
+const mainRouter = require('./routes');
 
 const Room = require('./room').Room;
 require('dotenv').config();
 
-
+const QUESTION_NUMBER = 5;
 const port = process.env.PORT || 3000;
 const connectedUsers = {};  // { socket : room (object) }
 const rooms = {};  // { roomId: room (object) }
@@ -25,7 +29,7 @@ admin.initializeApp({
 
 app.use(cookieParser());
 app.use(bodyParser.json());
-// app.use('/users', Middleware.isAuthenticated);
+app.use('/', mainRouter);
 
 mongoose.connect(process.env.DB_URI, {
   useNewUrlParser: true,
@@ -39,20 +43,9 @@ mongoose.connect(process.env.DB_URI, {
     console.log(err);
   });
 
-
-app.get('/', (req, res) => {
-  res.sendFile(__dirname + '/index.html');
-});
-
-app.get('/users', Middleware.isAuthenticated, UserController.index);
-app.get('/user/:uid', UserController.show);
-app.post('/users', UserController.store);
-
-app.get('/words', QuestionController.index);
-
-// io.use((socket, next) => {
-  
-// })
+const removeWaitingUser = (socket) => {
+  waitingUsers = waitingUsers.filter(user => !(Object.is(socket, user.socket)));
+}
 
 io.on('connection', (socket) => {
   // const authorizationHeader = req.headers['authorization'] ? req.headers['authorization'].split(" ")[1] : '';
@@ -84,7 +77,8 @@ io.on('connection', (socket) => {
     // Time complexity O(n)
     else {
       console.log('[DISCONNECTED] not in a room');
-      waitingUsers = waitingUsers.filter(user => !(Object.is(socket, user.socket)));
+      removeWaitingUser(socket);
+      // waitingUsers = waitingUsers.filter(user => !(Object.is(socket, user.socket)));
     }
   });
 
@@ -98,34 +92,33 @@ io.on('connection', (socket) => {
    * @param {('en' | 'tr')} to - Answer language
   */
   socket.on("JOIN ROOM", (object, callback) => {
+    
     console.log(`[JOIN ROOM] ${JSON.stringify(object)} is looking for room`);
-
-
+    
     // If there is another user waiting for a game
     // put them in the same room and start the game
-    if (waitingUsers.length > 0) {
+    let target = object.languages.to; // Target language
+    const user = {
+      username: object.username,
+      uid: object.uid,
+      socket
+    }
+
+    // TODO: Replace User with the User model
+    if (!QueueController.isEmpty(target) && !QueueController.isDuplicate(target, user)) {
       const roomId = uuidv4();
       const roomSocket = io.to(roomId);
-      /*
-      const langs = {
-          "from" : "en",
-          "to" : "tr"
-      };
-      */
-
       const users = new Map();
 
-      // console.log(`[DEBUG] ${JSON.stringify(waitingUsers[0])}`)
       users.set(socket, {
         username: object.username,
+        id: object.uid
       });
 
       users.set(waitingUsers[0].socket, {
-        username: waitingUsers[0].username
+        username: waitingUsers[0].username,
+        id: waitingUsers[0].uid
       });
-
-      // console.log(users);
-      // console.log(`${JSON.stringify(users)}`);
 
 
       /* 
@@ -134,24 +127,31 @@ io.on('connection', (socket) => {
       }
       */
 
-      const room = new Room(roomId, roomSocket, users, object.category, 5, object.languages);
+      const room = new Room(roomId, roomSocket, users, object.category, QUESTION_NUMBER, object.languages);
 
       connectedUsers[socket] = room;
       connectedUsers[waitingUsers[0].socket] = room;
 
       socket.join(roomId);
-      waitingUsers[0].socket.join(roomId);
-      waitingUsers.shift();
+      const opponent = QueueController.dequeu(target);
+      opponent.socket.join(roomId);
+      // waitingUsers[0].socket.join(roomId);
+      // waitingUsers.shift();
       rooms[roomId] = room;
       room.init();
-    } else {
-      waitingUsers.push({
-        username: object.username,
-        socket,
-      });
+    } else if (!QuestionController.isDuplicate(target, object.user)) {
+      QueueController.enqueue(target, user)
+
       callback(null, { status: "OK" });
+    } else {
+      console.log(`[WARNING] Duplicate request from ${object.username}`)
     }
 
+  });
+
+  socket.on("CANCEL JOIN ROOM", () => {
+    removeWaitingUser(socket);
+    console.log("[CANCEL JOIN ROOM]");
   });
 
   socket.on("READY", (object) => {
@@ -180,8 +180,6 @@ io.on('connection', (socket) => {
 
   // });
 
-  // TODO: Oyun bitince oyunu rooms'dan sil
-  // TODO: LEAVE GAME mesajını handle'la
   socket.on("LEAVE GAME", () => {
     const activeRoom = connectedUsers[socket];
     console.log("[LEAVE GAME]");

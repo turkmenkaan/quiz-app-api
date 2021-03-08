@@ -7,11 +7,16 @@ const UserController = {
 
         admin.auth().listUsers()
             .then((listUsersResult) => {
+                
 
                 listUsersResult.users.forEach((user) => {
-                    users.push(user.email);
+                    users.push({ 
+                        displayName: user.displayName, 
+                        email: user.email 
+                    });
                 })
 
+                console.log(users);
                 res.send(users);
             })
             .catch((error) => {
