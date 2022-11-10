@@ -20,7 +20,7 @@
     "firebase-admin": "^9.5.0",
     "http": "0.0.1-security",
     "lodash.shuffle": "^4.2.0",
-    "mocha": "^8.3.0",
+    "mocha": "^10.1.0",
     "mongoose": "^5.11.15",
     "socket.io": "^2.4.1",
     "uuid": "^8.3.2"
